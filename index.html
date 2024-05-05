@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+	<div id="chat-container">
+		<h1>Chatbot Rekomendasi Hemat Energi dan Air di Rumah Tangga 🏡💡💧</h1>
+		<div id="chat-history"></div>
+		<form id="chat-form">
+			<input type="text" id="user-input" placeholder="Enter your message">
+			<button type="submit">Send</button>
+            <button type="button" id="reset-button">Reset Chat</button>
+		</form>
+	</div>
+	<div id="loader"> <img src="loader.gif" width="150px" alt="Loading..."> </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script>
+	const chatHistory = document.getElementById('chat-history');
+	const userInput = document.getElementById('user-input');
+	const form = document.getElementById('chat-form');
+    const resetButton = document.getElementById('reset-button');
+	async function sendMessage() {
+		const userMessage = userInput.value;
+		userInput.value = ''; // Clear input field
+		console.log(userMessage)
+		try {
+			const response = await fetch('/chat', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					userInput: userMessage
+				}),
+			});
+			const data = await response.json();
+			console.log(data)
+			const botMessage = data.response;
+			console.log(botMessage)
+				// tambahke history chat
+			chatHistory.innerHTML += marked.parse(`<div class="user-message">${userMessage}</div>`);
+			chatHistory.innerHTML += marked.parse(`<div class="bot-message">${botMessage}</div>`);
+			chatHistory.scrollTop = chatHistory.scrollHeight;
+		} catch(error) {
+			console.error('Error:', error);
+		}
+	}
+	form.addEventListener('submit', (event) => {
+		event.preventDefault(); 
+		const loader = document.getElementById('loader');
+		loader.style.display = 'block'; // Show the loader
+		sendMessage().finally(() => {
+			loader.style.display = 'none';
+		});;
+	});
+
+    resetButton.addEventListener('click', (event) => {
+        event.preventDefault(); 
+        const loader = document.getElementById('loader');
+        loader.style.display = 'block'; // Show the loader
+        chatHistory.innerHTML = '';
+        loader.style.display = 'none';
+    });
+	</script>
+</body>
+
+</html>
